@@ -1,8 +1,10 @@
 export const localStorageData = {
   users: [
-    { username: "pumin", password: "1234" }
+    { username: "admin", password: "password" },
+    { username: "pumin", password: "1234" },
   ],
-  currentUser: "pumin",
+  currentUser: "admin",
+
   boards: [
     {
       id: "board1",
@@ -14,10 +16,15 @@ export const localStorageData = {
           id: "col1",
           name: "Todo",
           tasks: [
-            { id: "task1", title: "Design UI", tags: ["UI"], description: "Use Figma" }
-          ]
-        }
-      ]
-    }
-  ]
+            {
+              id: "task1",
+              title: "Design UI",
+              tags: ["UI"],
+              description: "Use Figma",
+            },
+          ],
+        },
+      ],
+    },
+  ],
 };

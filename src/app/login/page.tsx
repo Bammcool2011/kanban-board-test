@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { localStorageData } from "../lib/localStorage"; // adjust path if needed
+import { localStorageData } from "../lib/localStorage";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -39,7 +39,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#212121]">
-      <div className="bg-[#1A1A1A] p-8 rounded-xl w-full max-w-md">
+      <div className="bg-[#1A1A1A] p-8 rounded-xl w-full max-w-md text-white">
         <h1 className="text-2xl font-bold mb-4">
           {isRegister ? "Register" : "Login"}
         </h1>

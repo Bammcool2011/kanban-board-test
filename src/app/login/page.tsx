@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { localStorageData } from "../lib/localStorage";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -10,29 +10,31 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isRegister, setIsRegister] = useState(false);
 
-  useEffect(() => {
-    // Initialize users in localStorage if not present
-    if (!localStorage.getItem("users")) {
-      localStorage.setItem("users", JSON.stringify(localStorageData.users));
-    }
-    const currentUser = localStorage.getItem("currentUser");
-    if (currentUser) router.push("/board");
-  }, []);
-
-  const handleSubmit = () => {
-    const users = JSON.parse(localStorage.getItem("users") || "[]");
+  const handleSubmit = async () => {
     if (isRegister) {
-      const exists = users.find((u: any) => u.username === username);
-      if (exists) return alert("User already exists");
-      users.push({ username, password });
-      localStorage.setItem("users", JSON.stringify(users));
+      // Register user
+      const { error } = await supabase
+        .from("users")
+        .insert([{ username, password }]);
+      if (error) {
+        alert("Register failed");
+        return;
+      }
       alert("Register success");
     } else {
-      const match = users.find(
-        (u: any) => u.username === username && u.password === password
-      );
-      if (!match) return alert("Invalid credentials");
-      localStorage.setItem("currentUser", username);
+      // Login user
+      const { data, error } = await supabase
+        .from("users")
+        .select("*")
+        .eq("username", username)
+        .eq("password", password)
+        .single();
+      if (error || !data) {
+        alert("Invalid credentials");
+        return;
+      }
+      // Save username to localStorage
+      localStorage.setItem("username", username);
       router.push("/board");
     }
   };

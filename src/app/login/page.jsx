@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "../../lib/supabaseClient";
+import { loginUser, registerUser } from "../../lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,28 +12,18 @@ export default function LoginPage() {
 
   const handleSubmit = async () => {
     if (isRegister) {
-      // Register user
-      const { error } = await supabase
-        .from("users")
-        .insert([{ username, password }]);
-      if (error) {
-        alert("Register failed");
+      const result = await registerUser(username, password);
+      if (!result.success) {
+        alert("Register failed: " + result.error);
         return;
       }
       alert("Register success");
     } else {
-      // Login user
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("username", username)
-        .eq("password", password)
-        .single();
-      if (error || !data) {
+      const result = await loginUser(username, password);
+      if (!result.success) {
         alert("Invalid credentials");
         return;
       }
-      // Save username to localStorage
       localStorage.setItem("username", username);
       router.push("/board");
     }

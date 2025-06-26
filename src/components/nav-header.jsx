@@ -1,33 +1,28 @@
 import React, { useEffect, useState } from "react";
 import NewBoardDialog from "./sub-components/new-board";
-import { SubmitBoard } from "../lib/SubmitBoard";
+import { createBoard } from "../lib/boards";
 
 export default function NavHeader() {
   const [currentUser, setCurrentUser] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
-    // Get username from localStorage
     const username = localStorage.getItem("username") || "";
     setCurrentUser(username);
   }, []);
 
-  // Handle board creation
   const handleCreateBoard = async (boardName, invitedUsers) => {
-    const result = await SubmitBoard(boardName, invitedUsers, currentUser);
+    const result = await createBoard(boardName, invitedUsers, currentUser);
     
     if (result.success) {
       setIsDialogOpen(false);
-      // Reload the page to show the new board
       window.location.reload();
     } else {
       alert("Failed to create board: " + result.error);
     }
   };
 
-  const handleLogout = () => {
-    window.location.href = "/login";
-  };
+  const handleLogout = () => window.location.href = "/login";
 
   return (
     <>

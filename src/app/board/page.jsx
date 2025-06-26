@@ -7,19 +7,17 @@ import { ColumnCard } from "../../components/ui/columncard";
 import EditTaskDialog from "../../dialogs/edit-task-dialog";
 import EditColumnDialog from "../../dialogs/edit-column-dialog";
 import EditBoardDialog from "../../dialogs/edit-board-dialog";
-import { getColumnsForBoard, deleteColumn } from "../../database/column-operations";
+import { getColumnsForBoard, deleteColumn } from "../../lib/columns";
 
 export default function BoardPage() {
 	const [selectedBoardId, setSelectedBoardId] = useState("");
 	const [currentColumns, setCurrentColumns] = useState([]);
 	const [refreshTrigger, setRefreshTrigger] = useState(0);
 	
-	// Edit dialog states
 	const [editTaskDialog, setEditTaskDialog] = useState({ isOpen: false, task: null });
 	const [editColumnDialog, setEditColumnDialog] = useState({ isOpen: false, column: null });
 	const [editBoardDialog, setEditBoardDialog] = useState({ isOpen: false, board: null });
 
-	// Load columns when selected board changes
 	useEffect(() => {
 		if (selectedBoardId) {
 			loadBoardColumns(selectedBoardId);
@@ -48,37 +46,19 @@ export default function BoardPage() {
 	};
 
 	const handleDeleteColumn = async (columnId) => {
-		// Delete column from database
 		const result = await deleteColumn(columnId);
 		if (result.success) {
-			// Remove column if database deletion was successful
 			setCurrentColumns(prev => prev.filter(col => col.id !== columnId));
 		} else {
 			alert("Failed to delete column: " + result.error);
 		}
 	};
 
-	// Refresh handlers when a task or column is created
-	const handleTaskCreated = () => {
-		setRefreshTrigger(prev => prev + 1);
-	};
-
-	const handleColumnCreated = () => {
-		setRefreshTrigger(prev => prev + 1);
-	};
-
-	// Edit handlers
-	const handleEditTask = (task) => {
-		setEditTaskDialog({ isOpen: true, task });
-	};
-
-	const handleEditColumn = (column) => {
-		setEditColumnDialog({ isOpen: true, column });
-	};
-
-	const handleEditBoard = (board) => {
-		setEditBoardDialog({ isOpen: true, board });
-	};
+	const handleTaskCreated = () => setRefreshTrigger(prev => prev + 1);
+	const handleColumnCreated = () => setRefreshTrigger(prev => prev + 1);
+	const handleEditTask = (task) => setEditTaskDialog({ isOpen: true, task });
+	const handleEditColumn = (column) => setEditColumnDialog({ isOpen: true, column });
+	const handleEditBoard = (board) => setEditBoardDialog({ isOpen: true, board });
 
 	const handleTaskUpdated = () => {
 		setRefreshTrigger(prev => prev + 1);

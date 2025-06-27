@@ -14,12 +14,8 @@ export default function NavHeader() {
   const handleCreateBoard = async (boardName, invitedUsers) => {
     const result = await createBoard(boardName, invitedUsers, currentUser);
     
-    if (result.success) {
-      setIsDialogOpen(false);
-      window.location.reload();
-    } else {
-      alert("Failed to create board: " + result.error);
-    }
+    setIsDialogOpen(false);
+    window.location.reload();
   };
 
   const handleLogout = () => window.location.href = "/login";

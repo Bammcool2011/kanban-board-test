@@ -64,10 +64,10 @@ export default function NewBoardDialog({
 
   return (
     <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-md mx-4">
+      <div className="bg-[#1A1A1A] rounded-lg shadow-xl w-full max-w-md mx-4">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900">
+        <div className="px-6 py-4 border-b-1 border-gray-200">
+          <h2 className="text-lg font-semibold text-white">
             Create New Board
           </h2>
         </div>
@@ -76,14 +76,14 @@ export default function NewBoardDialog({
         <form className="px-6 py-4" onSubmit={handleSubmit}>
           {/* Board Name Input */}
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               Board Name:
             </label>
             <input
               type="text"
               value={boardName}
               onChange={(e) => setBoardName(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#151515] focus:border-transparent"
+              className="w-full text-white px-3 py-2 border border-gray-500 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-gray-300 focus:border-transparent"
               placeholder="Enter board name..."
               required
             />
@@ -91,7 +91,7 @@ export default function NewBoardDialog({
 
           {/* Invite Users */}
           <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               Invite to:
             </label>
             <div className="flex">
@@ -99,7 +99,7 @@ export default function NewBoardDialog({
                 type="text"
                 value={currentInvite}
                 onChange={(e) => setCurrentInvite(e.target.value)}
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-[#151515] focus:border-transparent"
+                className="flex-1 text-white px-3 py-2 border border-gray-500 rounded-l-md focus:outline-none focus:ring-1 focus:ring-gray-300 focus:border-transparent"
                 placeholder="Enter username..."
               />
               <button

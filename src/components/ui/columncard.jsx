@@ -60,14 +60,14 @@ export const ColumnCard = ({
         <span className="text-white text-2xl font-bold tracking-wide">
           {columnName.toUpperCase()}
         </span>
-        <div className="flex gap-2 text-gray-400">
+        <div className="flex gap-4 text-gray-400">
           <button
             className="hover:text-white transition-colors"
             onClick={onEdit}
             aria-label="Edit column"
             type="button"
           >
-            <FiEdit2 size={20} />
+            <FiEdit2 size={16} />
           </button>
           <button
             className="hover:text-red-400 transition-colors"
@@ -75,7 +75,7 @@ export const ColumnCard = ({
             aria-label="Delete column"
             type="button"
           >
-            <FiTrash size={20} />
+            <FiTrash size={16} />
           </button>
         </div>
       </div>

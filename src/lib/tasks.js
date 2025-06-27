@@ -11,7 +11,7 @@ export const createTask = async (columnId, title, description, priority, assigne
 
   const newPosition = lastTask ? lastTask.position + 1 : 1;
 
-  const { data: newTask, error } = await supabase
+  const { data: newTask } = await supabase
     .from("tasks")
     .insert([{
       column_id: columnId,
@@ -22,10 +22,6 @@ export const createTask = async (columnId, title, description, priority, assigne
     }])
     .select("*")
     .single();
-
-  if (error) {
-    return { success: false, error: "Could not create task" };
-  }
 
   if (assignedUsers.length > 0) {
     const { data: usersData } = await supabase
@@ -46,15 +42,11 @@ export const createTask = async (columnId, title, description, priority, assigne
 };
 
 export const getTasksInColumn = async (columnId) => {
-  const { data: tasks, error } = await supabase
+  const { data: tasks } = await supabase
     .from("tasks")
     .select(`*, task_assignees (users (username))`)
     .eq("column_id", columnId)
     .order("position");
-
-  if (error) {
-    return { success: false, error: "Could not get tasks" };
-  }
 
   const formattedTasks = tasks.map(task => ({
     ...task,
@@ -65,27 +57,21 @@ export const getTasksInColumn = async (columnId) => {
 };
 
 export const updateTask = async (taskId, changes) => {
-  const { data: updatedTask, error } = await supabase
+  const { data: updatedTask } = await supabase
     .from("tasks")
     .update(changes)
     .eq("id", taskId)
     .select("*")
     .single();
 
-  if (error) {
-    return { success: false, error: "Could not update task" };
-  }
   return { success: true, task: updatedTask };
 };
 
 export const deleteTask = async (taskId) => {
   await supabase.from("task_assignees").delete().eq("task_id", taskId);
-  const { error } = await supabase.from("tasks").delete().eq("id", taskId);
+  await supabase.from("tasks").delete().eq("id", taskId);
 
-  if (error) {
-    return { success: false, error: "Could not delete task" };
-  }
-  return { success: true, message: "Task deleted successfully" };
+  return { success: true };
 };
 
 export const moveTaskUp = async (taskId, columnId) => {
@@ -95,10 +81,6 @@ export const moveTaskUp = async (taskId, columnId) => {
     .eq("id", taskId)
     .single();
 
-  if (!currentTask || currentTask.position <= 1) {
-    return { success: false, error: "Task is already at the top" };
-  }
-
   const { data: taskAbove } = await supabase
     .from("tasks")
     .select("id, position")
@@ -106,14 +88,10 @@ export const moveTaskUp = async (taskId, columnId) => {
     .eq("position", currentTask.position - 1)
     .single();
 
-  if (!taskAbove) {
-    return { success: false, error: "No task above to swap with" };
-  }
-
   await supabase.from("tasks").update({ position: currentTask.position }).eq("id", taskAbove.id);
   await supabase.from("tasks").update({ position: taskAbove.position }).eq("id", taskId);
 
-  return { success: true, message: "Task moved up" };
+  return { success: true };
 };
 
 export const moveTaskDown = async (taskId, columnId) => {
@@ -123,10 +101,6 @@ export const moveTaskDown = async (taskId, columnId) => {
     .eq("id", taskId)
     .single();
 
-  if (!currentTask) {
-    return { success: false, error: "Task not found" };
-  }
-
   const { data: taskBelow } = await supabase
     .from("tasks")
     .select("id, position")
@@ -134,12 +108,8 @@ export const moveTaskDown = async (taskId, columnId) => {
     .eq("position", currentTask.position + 1)
     .single();
 
-  if (!taskBelow) {
-    return { success: false, error: "Task is already at the bottom" };
-  }
-
   await supabase.from("tasks").update({ position: currentTask.position }).eq("id", taskBelow.id);
   await supabase.from("tasks").update({ position: taskBelow.position }).eq("id", taskId);
 
-  return { success: true, message: "Task moved down" };
+  return { success: true };
 };

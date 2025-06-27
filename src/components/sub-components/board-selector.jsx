@@ -39,14 +39,10 @@ export function BoardSelector({
     if (!selectedBoardId) return;
     
     const result = await deleteBoard(selectedBoardId);
-    if (result.success) {
-      setBoards((prev) =>
-        prev.filter((b) => String(b.id) !== String(selectedBoardId))
-      );
-      onBoardChange("");
-    } else {
-      alert("Failed to delete board: " + result.error);
-    }
+    setBoards((prev) =>
+      prev.filter((b) => String(b.id) !== String(selectedBoardId))
+    );
+    onBoardChange("");
   };
 
   const handleEdit = () => {
@@ -76,7 +72,7 @@ export function BoardSelector({
       </select>
       <button
         onClick={handleEdit}
-        className="p-2 rounded hover:bg-gray-700 text-gray-400 hover:text-white transition-colors flex items-center"
+        className="pl-2 text-gray-400 hover:text-white transition-colors"
         type="button"
         disabled={!selectedBoardId}
         title="Edit Board"
@@ -85,7 +81,7 @@ export function BoardSelector({
       </button>
       <button
         onClick={handleDelete}
-        className="p-2 rounded hover:bg-red-700 text-gray-400 hover:text-white transition-colors flex items-center"
+        className="p-2 text-gray-400 hover:text-red-400 transition-colors"
         type="button"
         disabled={!selectedBoardId}
         title="Delete Board"

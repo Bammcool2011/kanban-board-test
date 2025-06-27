@@ -30,14 +30,9 @@ export default function EditBoardDialog({
         title: title.trim(),
       });
 
-      if (result.success) {
-        // Success - close dialog and refresh
-        onBoardUpdated();
-        closeDialog();
-      } else {
-        // Show error message
-        alert("Failed to update board: " + result.error);
-      }
+      // Success - close dialog and refresh
+      onBoardUpdated();
+      closeDialog();
     }
   };
 
@@ -69,7 +64,7 @@ export default function EditBoardDialog({
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 bg-transparent border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-transparent border-gray-500 rounded-md text-white ring-1 focus:ring-gray-300 focus:outline-none"
               placeholder="Enter board name..."
               required
             />
@@ -79,14 +74,14 @@ export default function EditBoardDialog({
           <div className="flex justify-end gap-3">
             <button
               type="button"
-              className="px-6 py-2 text-sm font-medium text-gray-300 bg-transparent border border-gray-600 rounded-md hover:bg-gray-800 transition"
+              className="px-6 py-2 text-sm font-medium text-black bg-white border border-transparent rounded-md hover:bg-gray-100 transition"
               onClick={closeDialog}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition"
+              className="px-6 py-2 text-sm font-medium text-white bg-[#151515] border border-transparent rounded-md hover:bg-[#202020] transition"
             >
               Update Board
             </button>

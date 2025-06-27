@@ -40,14 +40,9 @@ export default function EditTaskDialog({
         priority: priority.toLowerCase(),
       });
 
-      if (result.success) {
-        // Success - close dialog and refresh
-        onTaskUpdated();
-        closeDialog();
-      } else {
-        // Show error message
-        alert("Failed to update task: " + result.error);
-      }
+      // Success - close dialog and refresh
+      onTaskUpdated();
+      closeDialog();
     }
   };
 
@@ -82,7 +77,7 @@ export default function EditTaskDialog({
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              className="w-full px-3 py-2 bg-transparent border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="w-full px-3 py-2 bg-transparent border-gray-500 rounded-md text-white ring-1 focus:ring-gray-300 focus:outline-none"
               placeholder="Enter task title..."
               required
             />
@@ -96,7 +91,7 @@ export default function EditTaskDialog({
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3 py-2 bg-transparent border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+              className="w-full px-3 py-2 bg-transparent border-gray-500 rounded-md text-white ring-1 focus:ring-gray-300 focus:outline-none resize-none"
               placeholder="Enter task description..."
               rows={4}
             />
@@ -112,7 +107,7 @@ export default function EditTaskDialog({
               <select
                 value={selectedColumn}
                 onChange={(e) => setSelectedColumn(e.target.value)}
-                className="w-full px-3 py-2 bg-[#262626] border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-[#262626] border-gray-500 rounded-md text-white ring-1 focus:ring-gray-300 focus:outline-none"
                 required
               >
                 <option value="" disabled>
@@ -134,7 +129,7 @@ export default function EditTaskDialog({
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
-                className="w-full px-3 py-2 bg-[#262626] border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full px-3 py-2 bg-[#262626] border-gray-500 rounded-md text-white ring-1 focus:ring-gray-300 focus:outline-none"
               >
                 <option value="LOW">LOW</option>
                 <option value="MEDIUM">MEDIUM</option>
@@ -147,14 +142,14 @@ export default function EditTaskDialog({
           <div className="flex justify-end gap-3">
             <button
               type="button"
-              className="px-6 py-2 text-sm font-medium text-gray-300 bg-transparent border border-gray-600 rounded-md hover:bg-gray-800 transition"
+              className="px-6 py-2 text-sm font-medium text-black bg-white border border-transparent rounded-md hover:bg-gray-100 transition"
               onClick={closeDialog}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="px-6 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 transition"
+              className="px-6 py-2 text-sm font-medium text-white bg-[#151515] border border-transparent rounded-md hover:bg-[#202020] transition"
             >
               Update Task
             </button>

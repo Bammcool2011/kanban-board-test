@@ -47,7 +47,7 @@ export default function TaskCard({
               onClick={onDelete}
               className="hover:text-red-400 transition-colors"
             >
-              Del
+              delete
             </button>
           )}
         </div>

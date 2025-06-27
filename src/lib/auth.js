@@ -1,36 +1,39 @@
 import { supabase } from "./supabaseClient";
 
 export const loginUser = async (username, password) => {
-  const { data, error } = await supabase
+  const { data } = await supabase
     .from("users")
     .select("*")
     .eq("username", username)
     .eq("password", password)
     .single();
 
-  if (error || !data) {
-    return { success: false, error: "Invalid credentials" };
+  if (data) {
+    return { success: true, user: data };
   }
-  return { success: true, user: data };
+  return { success: false };
 };
 
 export const registerUser = async (username, password) => {
-  const { error } = await supabase
+  // Check if user already exists
+  const existingUser = await checkUserExists(username);
+  if (existingUser) {
+    return { success: false, message: "Username already exists!" };
+  }
+
+  await supabase
     .from("users")
     .insert([{ username, password }]);
 
-  if (error) {
-    return { success: false, error: "Registration failed" };
-  }
-  return { success: true, message: "User registered successfully" };
+  return { success: true, message: "Registered successfully!" };
 };
 
 export const checkUserExists = async (username) => {
-  const { data: user, error } = await supabase
+  const { data: user } = await supabase
     .from("users")
     .select("username")
     .eq("username", username.trim())
     .single();
 
-  return !error && user;
+  return user;
 };

@@ -105,7 +105,6 @@ export default function NewBoardDialog({
             )}
           </div>
 
-          {/* Buttons */}
           <div className="flex justify-end gap-3">
             <button
               type="button"

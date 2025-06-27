@@ -46,12 +46,12 @@ export default function NavHeader() {
         </button>
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
-              {currentUser ? currentUser.charAt(0).toUpperCase() : "U"}
+            <div className="w-12 h-12 rounded-full bg-black flex items-center justify-center text-white font-bold">
+              {currentUser ? currentUser.charAt(0).toUpperCase() : "D"}
             </div>
             <div className="flex flex-col">
               <span className="text-white font-semibold leading-tight">
-                {currentUser || "User"}
+                {currentUser || "dev_user"}
               </span>
               <span className="text-xs text-gray-400">Project Manager</span>
             </div>

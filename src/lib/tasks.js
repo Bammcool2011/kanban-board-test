@@ -4,7 +4,6 @@ export function createTask(columnId, title, description, priority, assignedUsers
   if (!assignedUsers) {
     assignedUsers = [];
   }
-
   return supabase
     .from("tasks")
     .select("position")
@@ -66,7 +65,14 @@ export function getTasksInColumn(columnId) {
     .from("tasks")
     .select(`*, task_assignees (users (username))`)
     .eq("column_id", columnId)
-    .order("position");
+    .order("position")
+    .then(result => ({
+      success: !result.error,
+      tasks: (result.data || []).map(task => ({
+        ...task,
+        assignees: (task.task_assignees || []).map(assignee => assignee.users?.username).filter(Boolean)
+      }))
+    }));
 }
 
 export function updateTask(taskId, updates) {
@@ -87,7 +93,8 @@ export function deleteTask(taskId) {
       return supabase
         .from("tasks")
         .delete()
-        .eq("id", taskId);
+        .eq("id", taskId)
+        .then(result => ({ success: !result.error }));
     });
 }
 
@@ -117,4 +124,40 @@ export function updateTaskAssignees(taskId, usernames) {
           });
       }
     });
+}
+
+export async function moveTaskUp(taskId, columnId) {
+  const { data: tasks, error } = await supabase
+    .from("tasks")
+    .select("id, position")
+    .eq("column_id", columnId)
+    .order("position");
+  if (error || !tasks) return { success: false };
+  const idx = tasks.findIndex(t => t.id === taskId);
+  if (idx > 0) {
+    const prevTask = tasks[idx - 1];
+    const currTask = tasks[idx];
+    await supabase.from("tasks").update({ position: prevTask.position }).eq("id", currTask.id);
+    await supabase.from("tasks").update({ position: currTask.position }).eq("id", prevTask.id);
+    return { success: true };
+  }
+  return { success: false };
+}
+
+export async function moveTaskDown(taskId, columnId) {
+  const { data: tasks, error } = await supabase
+    .from("tasks")
+    .select("id, position")
+    .eq("column_id", columnId)
+    .order("position");
+  if (error || !tasks) return { success: false };
+  const idx = tasks.findIndex(t => t.id === taskId);
+  if (idx < tasks.length - 1 && idx !== -1) {
+    const nextTask = tasks[idx + 1];
+    const currTask = tasks[idx];
+    await supabase.from("tasks").update({ position: nextTask.position }).eq("id", currTask.id);
+    await supabase.from("tasks").update({ position: currTask.position }).eq("id", nextTask.id);
+    return { success: true };
+  }
+  return { success: false };
 }

@@ -27,7 +27,6 @@ export default function TaskCard({
 
   return (
     <div className="bg-[#2C2C2C] rounded-lg p-4 mb-3 border border-gray-600">
-      {/* Header with task title and action buttons */}
       <div className="flex justify-between items-start mb-2">
         <h3 className="text-white font-semibold text-base flex-1 pr-2">
           {task.title}
@@ -53,54 +52,9 @@ export default function TaskCard({
         </div>
       </div>
 
-      {/* Task Description */}
-      <p className="text-gray-300 text-sm mb-4 leading-relaxed">
-        {task.description}
-      </p>
-
-      {/* Move buttons row */}
-      <div className="flex justify-between items-center mb-3">
-        <div className="flex gap-1">
-          {onMoveUp && (
-            <button
-              onClick={onMoveUp}
-              disabled={!canMoveUp}
-              className={`p-1 rounded transition-colors ${
-                canMoveUp 
-                  ? 'text-gray-400 hover:text-white hover:bg-gray-700' 
-                  : 'text-gray-600 cursor-not-allowed'
-              }`}
-              title="Move task up"
-            >
-              <FiChevronUp size={16} />
-            </button>
-          )}
-          {onMoveDown && (
-            <button
-              onClick={onMoveDown}
-              disabled={!canMoveDown}
-              className={`p-1 rounded transition-colors ${
-                canMoveDown 
-                  ? 'text-gray-400 hover:text-white hover:bg-gray-700' 
-                  : 'text-gray-600 cursor-not-allowed'
-              }`}
-              title="Move task down"
-            >
-              <FiChevronDown size={16} />
-            </button>
-          )}
-        </div>
-
-        {/* Priority Badge */}
-        <span className={`px-3 py-1 rounded border text-xs font-medium ${getPriorityColor(task.priority)}`}>
-          {task.priority ? task.priority.toUpperCase() : "LOW"}
-        </span>
-      </div>
-
-      {/* Assigned Members */}
-      {task.assignedUsers && task.assignedUsers.length > 0 && (
-        <div className="flex flex-wrap gap-1">
-          {task.assignedUsers.map((user, index) => (
+      {task.assignees && task.assignees.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-3">
+          {task.assignees.map((user, index) => (
             <span
               key={index}
               className="px-2 py-1 bg-gray-700 text-gray-300 text-xs rounded"
@@ -110,6 +64,47 @@ export default function TaskCard({
           ))}
         </div>
       )}
+
+      <p className="text-gray-300 text-sm mb-4 leading-relaxed">
+        {task.description}
+      </p>
+
+      <div className="flex justify-center mb-3">
+        <span className={`px-3 py-1 rounded border text-xs font-medium ${getPriorityColor(task.priority)}`}>
+          {task.priority ? task.priority.toUpperCase() : "LOW"}
+        </span>
+      </div>
+
+      <div className="flex justify-center gap-2">
+        {onMoveUp && (
+          <button
+            onClick={onMoveUp}
+            disabled={!canMoveUp}
+            className={`p-1 rounded transition-colors ${
+              canMoveUp 
+                ? 'text-gray-400 hover:text-white hover:bg-gray-700' 
+                : 'text-gray-600 cursor-not-allowed'
+            }`}
+            title="Move task up"
+          >
+            <FiChevronUp size={16} />
+          </button>
+        )}
+        {onMoveDown && (
+          <button
+            onClick={onMoveDown}
+            disabled={!canMoveDown}
+            className={`p-1 rounded transition-colors ${
+              canMoveDown 
+                ? 'text-gray-400 hover:text-white hover:bg-gray-700' 
+                : 'text-gray-600 cursor-not-allowed'
+            }`}
+            title="Move task down"
+          >
+            <FiChevronDown size={16} />
+          </button>
+        )}
+      </div>
     </div>
   );
 }

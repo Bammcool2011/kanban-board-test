@@ -15,7 +15,6 @@ export const loginUser = async (username, password) => {
 };
 
 export const registerUser = async (username, password) => {
-  // Check if user already exists
   const existingUser = await checkUserExists(username);
   if (existingUser) {
     return { success: false, message: "Username already exists!" };
@@ -25,7 +24,7 @@ export const registerUser = async (username, password) => {
     .from("users")
     .insert([{ username, password }]);
 
-  return { success: true, message: "Registered successfully!"};
+  return { success: true, message: "Registered successfully!" };
 };
 
 export const checkUserExists = async (username) => {

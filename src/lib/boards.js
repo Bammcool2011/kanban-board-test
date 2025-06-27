@@ -18,16 +18,18 @@ export const createBoard = async (boardName, invitedUsers, currentUser) => {
     .insert([{ board_id: newBoard.id, user_id: currentUserData.id }]);
 
   if (invitedUsers.length > 0) {
-    const validUsers = [];
-    for (const username of invitedUsers) {
-      const { data: user } = await supabase
+    const userChecks = invitedUsers.map(username =>
+      supabase
         .from("users")
         .select("username")
         .eq("username", username.trim())
-        .single();
-      
-      if (user) validUsers.push(username);
-    }
+        .single()
+    );
+    
+    const userResults = await Promise.all(userChecks);
+    const validUsers = userResults
+      .filter(result => result.data)
+      .map(result => result.data.username);
 
     if (validUsers.length > 0) {
       const { data: usersData } = await supabase
@@ -92,4 +94,43 @@ export const getBoardMembers = async (boardId) => {
 
   const members = memberData.map(item => item.users.username);
   return { success: true, members };
+};
+
+export const updateBoardMembers = async (boardId, newMembers) => {
+  await supabase
+    .from("board_members")
+    .delete()
+    .eq("board_id", boardId);
+
+  if (newMembers.length > 0) {
+    const userChecks = newMembers.map(username =>
+      supabase
+        .from("users")
+        .select("username")
+        .eq("username", username.trim())
+        .single()
+    );
+    
+    const userResults = await Promise.all(userChecks);
+    const validUsers = userResults
+      .filter(result => result.data)
+      .map(result => result.data.username);
+
+    if (validUsers.length > 0) {
+      const { data: usersData } = await supabase
+        .from("users")
+        .select("id")
+        .in("username", validUsers);
+
+      if (usersData && usersData.length > 0) {
+        const memberRecords = usersData.map(user => ({
+          board_id: boardId,
+          user_id: user.id
+        }));
+        await supabase.from("board_members").insert(memberRecords);
+      }
+    }
+  }
+
+  return { success: true };
 };

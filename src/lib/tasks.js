@@ -1,115 +1,120 @@
 import { supabase } from "./supabaseClient";
 
-export const createTask = async (columnId, title, description, priority, assignedUsers = []) => {
-  const { data: lastTask } = await supabase
+export function createTask(columnId, title, description, priority, assignedUsers) {
+  if (!assignedUsers) {
+    assignedUsers = [];
+  }
+
+  return supabase
     .from("tasks")
     .select("position")
     .eq("column_id", columnId)
     .order("position", { ascending: false })
     .limit(1)
-    .single();
+    .single()
+    .then(function(result) {
+      var lastTask = result.data;
+      var newPosition = 1;
+      if (lastTask) {
+        newPosition = lastTask.position + 1;
+      }
+      return supabase
+        .from("tasks")
+        .insert([{
+          column_id: columnId,
+          title: title,
+          description: description,
+          priority: priority.toLowerCase(),
+          position: newPosition
+        }])
+        .select("*")
+        .single();
+    })
+    .then(function(result) {
+      var newTask = result.data;
+      if (assignedUsers.length > 0) {
+        return supabase
+          .from("users")
+          .select("id")
+          .in("username", assignedUsers)
+          .then(function(userResult) {
+            var usersData = userResult.data;
+            if (usersData && usersData.length > 0) {
+              var assigneeRecords = [];
+              for (var i = 0; i < usersData.length; i++) {
+                assigneeRecords.push({
+                  task_id: newTask.id,
+                  user_id: usersData[i].id
+                });
+              }
+              return supabase.from("task_assignees").insert(assigneeRecords)
+                .then(function() {
+                  return { success: true, task: newTask };
+                });
+            } else {
+              return { success: true, task: newTask };
+            }
+          });
+      } else {
+        return { success: true, task: newTask };
+      }
+    });
+}
 
-  const newPosition = lastTask ? lastTask.position + 1 : 1;
-
-  const { data: newTask } = await supabase
-    .from("tasks")
-    .insert([{
-      column_id: columnId,
-      title,
-      description,
-      priority: priority.toLowerCase(),
-      position: newPosition
-    }])
-    .select("*")
-    .single();
-
-  if (assignedUsers.length > 0) {
-    const { data: usersData } = await supabase
-      .from("users")
-      .select("id")
-      .in("username", assignedUsers);
-
-    if (usersData && usersData.length > 0) {
-      const assigneeRecords = usersData.map(user => ({
-        task_id: newTask.id,
-        user_id: user.id
-      }));
-      await supabase.from("task_assignees").insert(assigneeRecords);
-    }
-  }
-
-  return { success: true, task: newTask };
-};
-
-export const getTasksInColumn = async (columnId) => {
-  const { data: tasks } = await supabase
+export function getTasksInColumn(columnId) {
+  return supabase
     .from("tasks")
     .select(`*, task_assignees (users (username))`)
     .eq("column_id", columnId)
     .order("position");
+}
 
-  const formattedTasks = tasks.map(task => ({
-    ...task,
-    assignees: task.task_assignees.map(ta => ta.users.username)
-  }));
-
-  return { success: true, tasks: formattedTasks };
-};
-
-export const updateTask = async (taskId, changes) => {
-  const { data: updatedTask } = await supabase
+export function updateTask(taskId, updates) {
+  return supabase
     .from("tasks")
-    .update(changes)
+    .update(updates)
     .eq("id", taskId)
     .select("*")
     .single();
+}
 
-  return { success: true, task: updatedTask };
-};
+export function deleteTask(taskId) {
+  return supabase
+    .from("task_assignees")
+    .delete()
+    .eq("task_id", taskId)
+    .then(function() {
+      return supabase
+        .from("tasks")
+        .delete()
+        .eq("id", taskId);
+    });
+}
 
-export const deleteTask = async (taskId) => {
-  await supabase.from("task_assignees").delete().eq("task_id", taskId);
-  await supabase.from("tasks").delete().eq("id", taskId);
-
-  return { success: true };
-};
-
-export const moveTaskUp = async (taskId, columnId) => {
-  const { data: currentTask } = await supabase
-    .from("tasks")
-    .select("position")
-    .eq("id", taskId)
-    .single();
-
-  const { data: taskAbove } = await supabase
-    .from("tasks")
-    .select("id, position")
-    .eq("column_id", columnId)
-    .eq("position", currentTask.position - 1)
-    .single();
-
-  await supabase.from("tasks").update({ position: currentTask.position }).eq("id", taskAbove.id);
-  await supabase.from("tasks").update({ position: taskAbove.position }).eq("id", taskId);
-
-  return { success: true };
-};
-
-export const moveTaskDown = async (taskId, columnId) => {
-  const { data: currentTask } = await supabase
-    .from("tasks")
-    .select("position")
-    .eq("id", taskId)
-    .single();
-
-  const { data: taskBelow } = await supabase
-    .from("tasks")
-    .select("id, position")
-    .eq("column_id", columnId)
-    .eq("position", currentTask.position + 1)
-    .single();
-
-  await supabase.from("tasks").update({ position: currentTask.position }).eq("id", taskBelow.id);
-  await supabase.from("tasks").update({ position: taskBelow.position }).eq("id", taskId);
-
-  return { success: true };
-};
+export function updateTaskAssignees(taskId, usernames) {
+  return supabase
+    .from("task_assignees")
+    .delete()
+    .eq("task_id", taskId)
+    .then(function() {
+      if (usernames.length > 0) {
+        return supabase
+          .from("users")
+          .select("id")
+          .in("username", usernames)
+          .then(function(userResult) {
+            var usersData = userResult.data;
+            if (usersData && usersData.length > 0) {
+              var assigneeRecords = [];
+              for (var i = 0; i < usersData.length; i++) {
+                assigneeRecords.push({
+                  task_id: taskId,
+                  user_id: usersData[i].id
+                });
+              }
+              return supabase.from("task_assignees").insert(assigneeRecords);
+            }
+          });
+      }
+    });
+}

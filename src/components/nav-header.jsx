@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import NewBoardDialog from "./sub-components/new-board";
+import NewBoardDialog from "../dialogs/add-board-dialog";
 import { createBoard } from "../lib/boards";
 
 export default function NavHeader() {

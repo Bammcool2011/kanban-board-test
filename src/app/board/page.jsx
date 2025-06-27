@@ -27,31 +27,23 @@ export default function BoardPage() {
 	}, [selectedBoardId, refreshTrigger]);
 
 	const loadBoardColumns = async (boardId) => {
-		try {
-			const result = await getColumnsForBoard(boardId);
-			
-			if (result.success && result.columns) {
-				const formattedColumns = result.columns.map((col) => ({
-					id: col.id.toString(),
-					name: col.title,
-					title: col.title
-				}));
-				setCurrentColumns(formattedColumns);
-			} else {
-				setCurrentColumns([]);
-			}
-		} catch (error) {
+		const result = await getColumnsForBoard(boardId);
+		
+		if (result.success && result.columns) {
+			const formattedColumns = result.columns.map((col) => ({
+				id: col.id.toString(),
+				name: col.title,
+				title: col.title
+			}));
+			setCurrentColumns(formattedColumns);
+		} else {
 			setCurrentColumns([]);
 		}
 	};
 
 	const handleDeleteColumn = async (columnId) => {
 		const result = await deleteColumn(columnId);
-		if (result.success) {
-			setCurrentColumns(prev => prev.filter(col => col.id !== columnId));
-		} else {
-			alert("Failed to delete column: " + result.error);
-		}
+		setCurrentColumns(prev => prev.filter(col => col.id !== columnId));
 	};
 
 	const handleTaskCreated = () => setRefreshTrigger(prev => prev + 1);

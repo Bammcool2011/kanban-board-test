@@ -13,19 +13,20 @@ export default function LoginPage() {
   const handleSubmit = async () => {
     if (isRegister) {
       const result = await registerUser(username, password);
-      if (!result.success) {
-        alert("Register failed: " + result.error);
-        return;
+      if (result.success) {
+        alert(result.message);
+        setIsRegister(false); // Switch to login after successful registration
+      } else {
+        alert(result.message);
       }
-      alert("Register success");
     } else {
       const result = await loginUser(username, password);
-      if (!result.success) {
-        alert("Invalid credentials");
-        return;
+      if (result.success) {
+        localStorage.setItem("username", username);
+        router.push("/board");
+      } else {
+        alert("Invalid username or password!");
       }
-      localStorage.setItem("username", username);
-      router.push("/board");
     }
   };
 

@@ -1,0 +1,48 @@
+-- WARNING: This schema is for context only and is not meant to be run.
+-- Table order and constraints may not be valid for execution.
+
+CREATE TABLE public.board_members (
+  id integer NOT NULL DEFAULT nextval('board_members_id_seq'::regclass),
+  board_id integer,
+  user_id integer,
+  CONSTRAINT board_members_pkey PRIMARY KEY (id),
+  CONSTRAINT board_members_board_id_fkey FOREIGN KEY (board_id) REFERENCES public.boards(id),
+  CONSTRAINT board_members_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.boards (
+  id integer NOT NULL DEFAULT nextval('boards_id_seq'::regclass),
+  title text NOT NULL,
+  CONSTRAINT boards_pkey PRIMARY KEY (id)
+);
+CREATE TABLE public.columns (
+  id integer NOT NULL DEFAULT nextval('columns_id_seq'::regclass),
+  board_id integer,
+  title text NOT NULL,
+  position integer,
+  CONSTRAINT columns_pkey PRIMARY KEY (id),
+  CONSTRAINT columns_board_id_fkey FOREIGN KEY (board_id) REFERENCES public.boards(id)
+);
+CREATE TABLE public.task_assignees (
+  id integer NOT NULL DEFAULT nextval('task_assignees_id_seq'::regclass),
+  task_id integer,
+  user_id integer,
+  CONSTRAINT task_assignees_pkey PRIMARY KEY (id),
+  CONSTRAINT task_assignees_task_id_fkey FOREIGN KEY (task_id) REFERENCES public.tasks(id),
+  CONSTRAINT task_assignees_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id)
+);
+CREATE TABLE public.tasks (
+  id integer NOT NULL DEFAULT nextval('tasks_id_seq'::regclass),
+  column_id integer,
+  title text NOT NULL,
+  description text,
+  position integer,
+  priority text CHECK (priority = ANY (ARRAY['high'::text, 'medium'::text, 'low'::text])),
+  CONSTRAINT tasks_pkey PRIMARY KEY (id),
+  CONSTRAINT tasks_column_id_fkey FOREIGN KEY (column_id) REFERENCES public.columns(id)
+);
+CREATE TABLE public.users (
+  id integer NOT NULL DEFAULT nextval('users_id_seq'::regclass),
+  username text NOT NULL UNIQUE,
+  password text NOT NULL,
+  CONSTRAINT users_pkey PRIMARY KEY (id)
+);

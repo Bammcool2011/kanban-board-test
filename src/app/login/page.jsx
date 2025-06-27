@@ -15,7 +15,7 @@ export default function LoginPage() {
       const result = await registerUser(username, password);
       if (result.success) {
         alert(result.message);
-        setIsRegister(false); // Switch to login after successful registration
+        setIsRegister(false);
       } else {
         alert(result.message);
       }

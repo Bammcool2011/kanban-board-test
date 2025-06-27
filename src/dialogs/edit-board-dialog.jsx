@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { updateBoard } from "../lib/boards";
+import { updateBoard, getBoardMembers, updateBoardMembers } from "../lib/boards";
 
 export default function EditBoardDialog({
   isOpen,
@@ -9,53 +9,71 @@ export default function EditBoardDialog({
   onBoardUpdated,
   board,
 }) {
-  // Form data
   const [title, setTitle] = useState("");
+  const [newUser, setNewUser] = useState("");
+  const [boardMembers, setBoardMembers] = useState([]);
 
-  // When dialog opens, fill form with board data
   useEffect(() => {
     if (isOpen && board) {
       setTitle(board.title || "");
+      loadBoardMembers();
     }
   }, [isOpen, board]);
 
-  // Handle form submission
+  const loadBoardMembers = async () => {
+    if (board && board.id) {
+      const result = await getBoardMembers(board.id);
+      if (result.success) {
+        setBoardMembers(result.members);
+      }
+    }
+  };
+
+  const addUser = () => {
+    if (newUser.trim()) {
+      if (!boardMembers.includes(newUser.trim())) {
+        setBoardMembers([...boardMembers, newUser.trim()]);
+        setNewUser("");
+      }
+    }
+  };
+
+  const removeUser = (index) => {
+    setBoardMembers(boardMembers.filter((user, i) => i !== index));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Check if title is filled
-    if (title.trim() && board?.id) {
-      // Update the board in database
-      const result = await updateBoard(board.id, {
+    if (title.trim() && board && board.id) {
+      await updateBoard(board.id, {
         title: title.trim(),
       });
-
-      // Success - close dialog and refresh
+      
+      await updateBoardMembers(board.id, boardMembers);
+      
       onBoardUpdated();
       closeDialog();
     }
   };
 
-  // Close dialog and reset form
   const closeDialog = () => {
     setTitle("");
+    setNewUser("");
+    setBoardMembers([]);
     onClose();
   };
 
-  // Don't show dialog if not open
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-[#1A1A1A] rounded-lg shadow-xl w-full max-w-md mx-4 text-white">
-        {/* Dialog Header */}
         <div className="px-6 py-4 border-b border-gray-600">
           <h2 className="text-lg font-semibold text-white">Edit Board</h2>
         </div>
 
-        {/* Form */}
         <form className="px-6 py-4" onSubmit={handleSubmit}>
-          {/* Board Title */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Board Name
@@ -70,7 +88,47 @@ export default function EditBoardDialog({
             />
           </div>
 
-          {/* Buttons */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Board Members
+            </label>
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                value={newUser}
+                onChange={(e) => setNewUser(e.target.value)}
+                className="flex-1 px-3 py-2 bg-transparent border-gray-500 rounded-md text-white ring-1 focus:ring-gray-300 focus:outline-none"
+                placeholder="Enter username..."
+              />
+              <button
+                type="button"
+                onClick={addUser}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white text-sm"
+              >
+                Add
+              </button>
+            </div>
+            {boardMembers.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {boardMembers.map((user, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-gray-700 text-gray-300 text-sm rounded-full flex items-center gap-2"
+                  >
+                    @{user}
+                    <button
+                      type="button"
+                      onClick={() => removeUser(index)}
+                      className="text-red-400 hover:text-red-300 text-xs"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div className="flex justify-end gap-3">
             <button
               type="button"

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { updateTask } from "../lib/tasks";
+import { updateTask, updateTaskAssignees } from "../lib/tasks";
 
 export default function EditTaskDialog({
   isOpen,
@@ -10,65 +10,70 @@ export default function EditTaskDialog({
   task,
   columns,
 }) {
-  // Form data
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [selectedColumn, setSelectedColumn] = useState("");
   const [priority, setPriority] = useState("LOW");
+  const [assignedUsers, setAssignedUsers] = useState([]);
+  const [newUser, setNewUser] = useState("");
 
-  // When dialog opens, fill form with task data
   useEffect(() => {
     if (isOpen && task) {
       setTitle(task.title || "");
       setDescription(task.description || "");
       setSelectedColumn(task.column_id || "");
       setPriority(task.priority ? task.priority.toUpperCase() : "LOW");
+      setAssignedUsers(task.assignees || []);
     }
   }, [isOpen, task]);
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    // Check if required fields are filled
     if (title.trim() && selectedColumn && task?.id) {
-      // Update the task in database
-      const result = await updateTask(task.id, {
+      await updateTask(task.id, {
         title: title.trim(),
         description: description.trim(),
         column_id: selectedColumn,
         priority: priority.toLowerCase(),
       });
-
-      // Success - close dialog and refresh
+      await updateTaskAssignees(task.id, assignedUsers);
       onTaskUpdated();
       closeDialog();
     }
   };
 
-  // Close dialog and reset form
+  const addUser = () => {
+    if (newUser.trim()) {
+      if (!assignedUsers.includes(newUser.trim())) {
+        setAssignedUsers([...assignedUsers, newUser.trim()]);
+        setNewUser("");
+      }
+    }
+  };
+
+  const removeUser = (index) => {
+    setAssignedUsers(assignedUsers.filter((user, i) => i !== index));
+  };
+
   const closeDialog = () => {
     setTitle("");
     setDescription("");
     setSelectedColumn("");
     setPriority("LOW");
+    setAssignedUsers([]);
+    setNewUser("");
     onClose();
   };
 
-  // Don't show dialog if not open
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-[#1A1A1A] rounded-lg shadow-xl w-full max-w-md mx-4 text-white">
-        {/* Dialog Header */}
         <div className="px-6 py-4 border-b border-gray-600">
           <h2 className="text-lg font-semibold text-white">Edit Task</h2>
         </div>
-
-        {/* Form */}
         <form className="px-6 py-4" onSubmit={handleSubmit}>
-          {/* Task Title */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Task Title
@@ -82,8 +87,6 @@ export default function EditTaskDialog({
               required
             />
           </div>
-
-          {/* Task Description */}
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Description
@@ -96,10 +99,7 @@ export default function EditTaskDialog({
               rows={4}
             />
           </div>
-
-          {/* Column and Priority Row */}
           <div className="flex gap-4 mb-4">
-            {/* Column Selection */}
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Column
@@ -120,8 +120,6 @@ export default function EditTaskDialog({
                 ))}
               </select>
             </div>
-            
-            {/* Priority Selection */}
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Priority
@@ -137,8 +135,46 @@ export default function EditTaskDialog({
               </select>
             </div>
           </div>
-
-          {/* Buttons */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
+              Assign Users
+            </label>
+            <div className="flex gap-2 mb-2">
+              <input
+                type="text"
+                value={newUser}
+                onChange={(e) => setNewUser(e.target.value)}
+                className="flex-1 px-3 py-2 bg-transparent border-gray-500 rounded-md text-white ring-1 focus:ring-gray-300 focus:outline-none"
+                placeholder="Enter username..."
+              />
+              <button
+                type="button"
+                onClick={addUser}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-md text-white text-sm"
+              >
+                Add
+              </button>
+            </div>
+            {assignedUsers.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {assignedUsers.map((user, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-gray-700 text-gray-300 text-sm rounded-full flex items-center gap-2"
+                  >
+                    @{user}
+                    <button
+                      type="button"
+                      onClick={() => removeUser(index)}
+                      className="text-red-400 hover:text-red-300 text-xs"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
           <div className="flex justify-end gap-3">
             <button
               type="button"

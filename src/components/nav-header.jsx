@@ -1,24 +1,39 @@
 import React, { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import NewBoardDialog from "./sub-components/new-board";
 import { createBoard } from "../lib/boards";
 
 export default function NavHeader() {
+  const router = useRouter();
   const [currentUser, setCurrentUser] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   useEffect(() => {
     const username = localStorage.getItem("username") || "";
     setCurrentUser(username);
-  }, []);
+    
+    if (!username) {
+      router.push("/login");
+    }
+  }, [router]);
 
   const handleCreateBoard = async (boardName, invitedUsers) => {
+    if (!currentUser) return;
+    
     const result = await createBoard(boardName, invitedUsers, currentUser);
     
     setIsDialogOpen(false);
     window.location.reload();
   };
 
-  const handleLogout = () => window.location.href = "/login";
+  const handleLogout = () => {
+    localStorage.removeItem("username");
+    router.push("/login");
+  };
+
+  if (!currentUser) {
+    return null;
+  }
 
   return (
     <>
@@ -31,10 +46,12 @@ export default function NavHeader() {
         </button>
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-gray-300" />
+            <div className="w-12 h-12 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
+              {currentUser ? currentUser.charAt(0).toUpperCase() : "U"}
+            </div>
             <div className="flex flex-col">
               <span className="text-white font-semibold leading-tight">
-                {currentUser}
+                {currentUser || "User"}
               </span>
               <span className="text-xs text-gray-400">Project Manager</span>
             </div>
@@ -48,6 +65,7 @@ export default function NavHeader() {
           </button>
         </div>
       </div>
+
       <NewBoardDialog
         isOpen={isDialogOpen}
         onClose={() => setIsDialogOpen(false)}

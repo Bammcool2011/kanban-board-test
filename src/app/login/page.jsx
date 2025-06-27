@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { supabase } from "@/lib/supabaseClient";
+import { loginUser, registerUser } from "../../lib/auth";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,30 +12,21 @@ export default function LoginPage() {
 
   const handleSubmit = async () => {
     if (isRegister) {
-      // Register user
-      const { error } = await supabase
-        .from("users")
-        .insert([{ username, password }]);
-      if (error) {
-        alert("Register failed");
-        return;
+      const result = await registerUser(username, password);
+      if (result.success) {
+        alert(result.message);
+        setIsRegister(false);
+      } else {
+        alert(result.message);
       }
-      alert("Register success");
     } else {
-      // Login user
-      const { data, error } = await supabase
-        .from("users")
-        .select("*")
-        .eq("username", username)
-        .eq("password", password)
-        .single();
-      if (error || !data) {
-        alert("Invalid credentials");
-        return;
+      const result = await loginUser(username, password);
+      if (result.success) {
+        localStorage.setItem("username", username);
+        router.push("/board");
+      } else {
+        alert("Invalid username or password!");
       }
-      // Save username to localStorage
-      localStorage.setItem("username", username);
-      router.push("/board");
     }
   };
 
@@ -47,13 +38,13 @@ export default function LoginPage() {
         </h1>
 
         <input
-          className="border border-[#666666] rounded-sm p-2 w-full mb-2"
+          className="border border-[#666666] rounded-sm p-2 w-full mb-2 bg-[#2A2A2A] text-white"
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
         />
         <input
-          className="border border-[#666666] rounded-sm p-2 w-full mb-4"
+          className="border border-[#666666] rounded-sm p-2 w-full mb-4 bg-[#2A2A2A] text-white"
           type="password"
           placeholder="Password"
           value={password}
@@ -61,7 +52,7 @@ export default function LoginPage() {
         />
 
         <button
-          className="bg-[#151515] text-white px-4 py-2 w-full"
+          className="bg-[#151515] text-white px-4 py-2 w-full hover:bg-[#202020]"
           onClick={handleSubmit}
         >
           {isRegister ? "Register" : "Login"}
@@ -70,7 +61,7 @@ export default function LoginPage() {
         <p className="mt-4 text-sm text-center">
           {isRegister ? "Have account?" : "Doesn't have account?"}{" "}
           <span
-            className="text-blue-500 cursor-pointer mx-2"
+            className="text-blue-500 cursor-pointer mx-2 hover:text-blue-400"
             onClick={() => setIsRegister(!isRegister)}
           >
             {isRegister ? "Login" : "Register"}

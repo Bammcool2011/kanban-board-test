@@ -7,65 +7,43 @@ import { ColumnCard } from "../../components/ui/columncard";
 import EditTaskDialog from "../../dialogs/edit-task-dialog";
 import EditColumnDialog from "../../dialogs/edit-column-dialog";
 import EditBoardDialog from "../../dialogs/edit-board-dialog";
-import { getColumnsForBoard, deleteColumn } from "../../lib/columns";
+import { useBoardPageLogic } from "../../lib/boardPageManager";
 
 export default function BoardPage() {
 	const [selectedBoardId, setSelectedBoardId] = useState("");
 	const [currentColumns, setCurrentColumns] = useState([]);
 	const [refreshTrigger, setRefreshTrigger] = useState(0);
-	
 	const [editTaskDialog, setEditTaskDialog] = useState({ isOpen: false, task: null });
 	const [editColumnDialog, setEditColumnDialog] = useState({ isOpen: false, column: null });
 	const [editBoardDialog, setEditBoardDialog] = useState({ isOpen: false, board: null });
 
+	const { getColumns, removeColumn, refresh, createDialogs } = useBoardPageLogic();
+
+	const taskCreated = refresh(setRefreshTrigger);
+	const columnCreated = refresh(setRefreshTrigger);
+	
+	const {
+		editTask,
+		taskUpdated,
+		closeTask,
+		editColumn,
+		columnUpdated,
+		closeColumn,
+		editBoard,
+		boardUpdated,
+		closeBoard
+	} = createDialogs(setEditTaskDialog, setEditColumnDialog, setEditBoardDialog, setRefreshTrigger);
+
+	const deleteCol = (columnId) => removeColumn(columnId, setCurrentColumns);
+
+	// Load columns when board changes
 	useEffect(() => {
 		if (selectedBoardId) {
-			loadBoardColumns(selectedBoardId);
+			getColumns(selectedBoardId).then(setCurrentColumns);
 		} else {
 			setCurrentColumns([]);
 		}
 	}, [selectedBoardId, refreshTrigger]);
-
-	const loadBoardColumns = async (boardId) => {
-		const result = await getColumnsForBoard(boardId);
-		
-		if (result.success && result.columns) {
-			const formattedColumns = result.columns.map((col) => ({
-				id: col.id.toString(),
-				name: col.title,
-				title: col.title
-			}));
-			setCurrentColumns(formattedColumns);
-		} else {
-			setCurrentColumns([]);
-		}
-	};
-
-	const handleDeleteColumn = async (columnId) => {
-		const result = await deleteColumn(columnId);
-		setCurrentColumns(prev => prev.filter(col => col.id !== columnId));
-	};
-
-	const handleTaskCreated = () => setRefreshTrigger(prev => prev + 1);
-	const handleColumnCreated = () => setRefreshTrigger(prev => prev + 1);
-	const handleEditTask = (task) => setEditTaskDialog({ isOpen: true, task });
-	const handleEditColumn = (column) => setEditColumnDialog({ isOpen: true, column });
-	const handleEditBoard = (board) => setEditBoardDialog({ isOpen: true, board });
-
-	const handleTaskUpdated = () => {
-		setRefreshTrigger(prev => prev + 1);
-		setEditTaskDialog({ isOpen: false, task: null });
-	};
-
-	const handleColumnUpdated = () => {
-		setRefreshTrigger(prev => prev + 1);
-		setEditColumnDialog({ isOpen: false, column: null });
-	};
-
-	const handleBoardUpdated = () => {
-		setRefreshTrigger(prev => prev + 1);
-		setEditBoardDialog({ isOpen: false, board: null });
-	};
 
 	return (
 		<div>
@@ -74,15 +52,15 @@ export default function BoardPage() {
 				<BoardSelector
 					selectedBoardId={selectedBoardId}
 					onBoardChange={setSelectedBoardId}
-					onEditBoard={handleEditBoard}
+					onEditBoard={editBoard}
 				/>
 				{selectedBoardId && (
 					<>
 						<NewColTask 
 							boardId={selectedBoardId}
 							columns={currentColumns}
-							onTaskCreated={handleTaskCreated}
-							onColumnCreated={handleColumnCreated}
+							onTaskCreated={taskCreated}
+							onColumnCreated={columnCreated}
 						/>
 						<div className="mt-8 flex gap-6">
 							{currentColumns.length === 0 ? (
@@ -97,9 +75,9 @@ export default function BoardPage() {
 										columnId={col.id}
 										columnName={col.name}
 										refreshTrigger={refreshTrigger}
-										onDelete={handleDeleteColumn}
-										onEdit={() => handleEditColumn(col)}
-										onEditTask={handleEditTask}
+										onDelete={deleteCol}
+										onEdit={() => editColumn(col)}
+										onEditTask={editTask}
 									/>
 								))
 							)}
@@ -108,26 +86,25 @@ export default function BoardPage() {
 				)}
 			</div>
 
-			{/* Edit Dialogs */}
 			<EditTaskDialog
 				isOpen={editTaskDialog.isOpen}
-				onClose={() => setEditTaskDialog({ isOpen: false, task: null })}
-				onTaskUpdated={handleTaskUpdated}
+				onClose={closeTask}
+				onTaskUpdated={taskUpdated}
 				task={editTaskDialog.task}
 				columns={currentColumns}
 			/>
 			
 			<EditColumnDialog
 				isOpen={editColumnDialog.isOpen}
-				onClose={() => setEditColumnDialog({ isOpen: false, column: null })}
-				onColumnUpdated={handleColumnUpdated}
+				onClose={closeColumn}
+				onColumnUpdated={columnUpdated}
 				column={editColumnDialog.column}
 			/>
 			
 			<EditBoardDialog
 				isOpen={editBoardDialog.isOpen}
-				onClose={() => setEditBoardDialog({ isOpen: false, board: null })}
-				onBoardUpdated={handleBoardUpdated}
+				onClose={closeBoard}
+				onBoardUpdated={boardUpdated}
 				board={editBoardDialog.board}
 			/>
 		</div>

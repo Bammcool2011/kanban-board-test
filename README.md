@@ -23,8 +23,8 @@ https://www.figma.com/design/s0opehdgvulD8PZxtdzyXT/Kanban-Board?node-id=0-1&t=S
 ## Excalidraw / Mermaid (Database Design & Project Overview)
 https://excalidraw.com/#json=UvaU1xTCIf4rfMo1cqwOZ,u4_Fq7j_GypQU-jRYOkAzA
 
-## Future Improvements (อนาคต)
-- Integrate a real backend system (Node.js/Express or similar) | ต้องศึกษาเพิ่ม
+## Future Improvements
+- Integrate a real backend system (Node.js/Express or similar)
 - Implement drag and drop for tasks and columns
 - Add more advanced features (activity log, notifications, etc.)
 
